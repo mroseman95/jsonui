@@ -40,7 +40,6 @@ type query struct {
 type treeNode interface {
 	String(int, int) string
 	draw(io.Writer, int, int) error
-	filter(query query) bool
 	find(treePosition) treeNode
 	search(query string) (treeNode, error)
 	isCollapsable() bool
@@ -95,7 +94,7 @@ func (n complexNode) search(query string) (treeNode, error) {
 		map[string]treeNode{},
 	}
 	for key, value := range n.data {
-		if key == query {
+		if strings.Contains(key, query) {
 			filteredNode.data[key] = value
 		}
 	}
@@ -171,10 +170,6 @@ func (n complexNode) draw(writer io.Writer, padding, lvl int) error {
 		}
 	}
 	return nil
-
-}
-func (n complexNode) filter(query query) bool {
-	return true
 
 }
 
@@ -264,10 +259,6 @@ func (n listNode) draw(writer io.Writer, padding, lvl int) error {
 	return nil
 
 }
-func (n listNode) filter(query query) bool {
-	return true
-
-}
 
 type floatNode struct {
 	baseTreeNode
@@ -295,10 +286,6 @@ func (n floatNode) String(int, int) string {
 
 func (n floatNode) draw(writer io.Writer, padding, lvl int) error {
 	return nil
-
-}
-func (n floatNode) filter(query query) bool {
-	return true
 
 }
 
@@ -333,9 +320,6 @@ func (n stringNode) draw(writer io.Writer, padding, lvl int) error {
 	return nil
 
 }
-func (n stringNode) filter(query query) bool {
-	return true
-}
 
 type boolNode struct {
 	baseTreeNode
@@ -367,9 +351,7 @@ func (n boolNode) draw(writer io.Writer, padding, lvl int) error {
 	return nil
 
 }
-func (n boolNode) filter(query query) bool {
-	return true
-}
+
 func newTree(y interface{}) (treeNode, error) {
 	var tree treeNode
 	switch v := y.(type) {
